@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?define ProductVersion = "0.9.0"?>
+<?define UpgradeCode = "{FCF1E6F4-99E3-4705-A9D0-EEA325049D8A}"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Product Id="*" Name="MultiSave" Version="$(var.ProductVersion)" Language="1033" Manufacturer="KABESA" UpgradeCode="$(var.UpgradeCode)">
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+    <InstallExecuteSequence>
+      <RemoveExistingProducts After="InstallInitialize" />
+    </InstallExecuteSequence>
+
+    <Upgrade Id="$(var.UpgradeCode)">
+      <UpgradeVersion OnlyDetect="no" IncludeMinimum="yes" IncludeMaximum="yes" Minimum="0.0.1" Maximum="$(var.ProductVersion)" Property="PREVIOUSVERSIONSINSTALLED"/>
+      <UpgradeVersion OnlyDetect="yes" IncludeMinimum="no" Minimum="$(var.ProductVersion)" Property="NEWERVERSIONDETECTED"/>
+    </Upgrade>
+    <CustomActionRef Id="WixExitEarlyWithSuccess"/>
+		<MediaTemplate />
+
+    <Icon Id="Multisave.ico" SourceFile="C:\Users\kabesa\OneDrive\DEVELOPMENT PORTFOLIO\MultiSave\MultiSaveIcon.ico"/>
+    <Property Id="ARPPRODUCTICON" Value="Multisave.ico" />
+
+		<Feature Id="MSvFeature" Title="MSvProject" Level="1">
+			<ComponentRef Id="MultiSave.exe" />
+      <ComponentRef Id="BatchSave.exe" />
+      <ComponentRef Id="BatchSave.exe.config" />
+      <ComponentRef Id="ApplicationShortcut" />   
+		</Feature>
+	</Product>
+
+	<Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFilesFolder">
+				<Directory Id="MULTIINSTALLFOLDER" Name="MultiSave" />
+			</Directory>
+      <Directory Id="CommonAppDataFolder">
+				<Directory Id="BATCHINSTALLFOLDER" Name="MultiSave" />
+			</Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="MultiSave"/>
+      </Directory>
+		</Directory>
+	</Fragment>  
+
+	<Fragment>
+		<DirectoryRef Id="MULTIINSTALLFOLDER">
+      <Component Id="MultiSave.exe" Guid="{DE3F95AE-AA4C-4B01-AED0-FDECAF9D53EE}">
+          <File Id="MultiSave.exe" Source="C:\Users\kabesa\OneDrive\DEVELOPMENT PORTFOLIO\MultiSave\MultiSave\bin\Release\MultiSave.exe" KeyPath="yes" Checksum="yes"/>
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="BATCHINSTALLFOLDER">
+      <Component Id="BatchSave.exe" Guid="{9C901CC0-C7DB-4F55-A181-F42274112EF4}">
+          <File Id="BatchSave.exe" Source="C:\Users\kabesa\OneDrive\DEVELOPMENT PORTFOLIO\MultiSave\BatchSave\bin\Release\BatchSave.exe" KeyPath="yes" Checksum="yes"/>
+      </Component>
+      <Component Id="BatchSave.exe.config" Guid="{6B8C40DD-C759-4BCF-B334-098C8D1AC004}">
+        <File Id="BatchSave.exe.config" Source="C:\Users\kabesa\OneDrive\DEVELOPMENT PORTFOLIO\MultiSave\BatchSave\bin\Release\BatchSave.exe.config" KeyPath="yes" Checksum="yes"/>
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="ApplicationShortcut" Guid="{0BE7A4AC-A191-4DB9-81D2-2418B6D643E2}">
+          <Shortcut Id="MultiSaveStartShortcut" 
+                    Name="MultiSave"
+                    Description="Save to multiple locations at once"
+                    Target="[#MultiSave.exe]"
+                    WorkingDirectory="APPLICATIONROOTDIRECTORY"
+                    Icon="Multisave.ico"/>
+          <RemoveFolder Id="CleanUpShortCut" Directory="ApplicationProgramsFolder" On="uninstall"/>
+          <RegistryValue Root="HKCU" Key="Software\Microsoft\MultiSave" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+      </Component>
+    </DirectoryRef>
+	</Fragment>
+
+</Wix>
