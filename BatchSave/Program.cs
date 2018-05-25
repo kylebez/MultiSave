@@ -13,14 +13,13 @@ namespace BatchSave
     {
         static void Main(string[] args)
         {
-            Debugger.Launch();
             string source = "";
             bool syncBelow = false;
             bool createFolders = false;
             bool overWrite = false;
             bool conFirm = false; 
             ObjectCache cache = MemoryCache.Default;            
-            ArrayList copypaths = new ArrayList();
+            ArrayList copypaths = new ArrayList();            
             //Check for valid file path parameters
             if (args.Length > 2)
             {
@@ -30,6 +29,7 @@ namespace BatchSave
                 if (targetPaths == null) { targetPaths = new List<string>(); }
 
                 source = args[0];
+                string lio = source.Substring(source.LastIndexOf("\\"));
                 //Set destination args into cache if they have changed
                 bool oldCache = false;                   
                 List<string> mtarget = new List<string>();                
@@ -44,8 +44,9 @@ namespace BatchSave
                 }
                 if (oldCache || targetPaths.Count == 0)
                 {
-                    targetPaths = mtarget;
-                    Properties.Settings.Default.targetpaths = targetPaths;
+                    targetPaths.Clear();
+                    filePaths.Clear();
+                    Properties.Settings.Default.targetpaths = mtarget;
                 }
                 string syncParam = args[args.Length - 4];
                 string createParam = args[args.Length - 3];
@@ -80,8 +81,7 @@ namespace BatchSave
                         return;
                     }
                 }
-                string[] ffn = source.Split('\\');
-                string filename = ffn[ffn.Length - 1];
+                string[] ffn = source.Split('\\'); //Split the source filepath
                 int tfilePaths = filePaths.Count;
                 List<string> mpathList = new List<string>();
                 if (filePaths != null && filePaths.Count > 0)
@@ -89,11 +89,11 @@ namespace BatchSave
                     foreach (string pl in filePaths)
                     {
                         if (filePaths.Count > tfilePaths) { break; }
-                        for (int t = 2; t < args.Length - 4; t++)
+                        for (int t = 0; t < copypaths.Count; t++)
                         {
-                            if (pl.Contains(args[t]))
+                            if (pl.Contains((string)copypaths[t]))
                             {
-                                mpathList.Add(pl);
+                                mpathList.Add(pl);// List from cache
                             }
                         }
                     }
@@ -103,98 +103,87 @@ namespace BatchSave
                     if (!source.Contains(f))              
                     {
                         if (syncBelow) {
-                            bool found = false;
-                            ArrayList compare = new ArrayList();                           
-                            bool incache = false;                            
-                            //Check cache first
-                            for (int i = 1; i < ffn.Length - 1; i++)
-                            {                                                               
-                                if (tfilePaths > 0)
-                                {
-                                    for (int t = 0; t < mpathList.Count; t++)
-                                    {
-                                        if (mpathList[t].Contains(f))
-                                        {
-                                            string fffn = "";
-                                            for (int w = i; w < ffn.Length - i; w++) { fffn += "\\" + ffn[w]; }
-                                            if (mpathList[t].Contains(fffn))
-                                            {
-                                                if (Directory.Exists(mpathList[t]))
-                                                {
-                                                    string lio = source.Substring(source.LastIndexOf("\\"));
-                                                    string file = mpathList[t] + "\\" + lio;
-                                                    Copy(source, file, overWrite, conFirm);
-                                                    found = true;
-                                                    incache = true;
-                                                    mpathList[t] = "";
-                                                }
-                                            }
-                                        }
+                            bool found = false;                            
+                            ArrayList destinationpaths = new ArrayList();                            
+
+                            //CHECK IN CACHE
+                            bool inCache = false;
+                            foreach (string m in mpathList) {
+                                if (m.Contains(f)) {
+                                    if (Directory.Exists(m)) {
+                                        destinationpaths.Add(m);
+                                        inCache = true;
+                                        found = true;
                                     }
                                 }
                             }
-                            //Then check file system if not extant
-                            if (!incache)
-                            {
+                            //CHECK NOT IN CACHE
+                            if (!inCache) {
+                                char[] ch = new char[] { '\\' };
+                                //string[] cfn = f.Split(ch, StringSplitOptions.RemoveEmptyEntries); //Split the copypath
                                 for (int i = 1; i < ffn.Length - 1; i++)
                                 {
-                                    string[] d = null;
-                                    try
-                                    {
-                                        d = Directory.GetDirectories(f, ffn[i], SearchOption.AllDirectories);
-                                    }
-                                    catch (UnauthorizedAccessException ex)
-                                    {
-                                        System.Windows.Forms.MessageBox.Show(ex.ToString());
-                                        continue;
-                                    }
-                                    if (d != null && d.Length > 0)
-                                    {
-                                        string fileend = "";
-                                        for (int x = i + 1; x < ffn.Length - 1; x++)
+                                    string tp = f + "\\" + ffn[i];
+                                    string[] exist = Directory.GetDirectories(f, ffn[i], SearchOption.AllDirectories);
+                                    if (exist.Length > 0)
+                                    { //found list of matched folders in directory
+                                      //check if the rest of path are in these folders
+                                        foreach (string p in exist)
                                         {
-                                            fileend += "\\" + ffn[x];
-                                        }
-                                        for (int n = 0; n < d.Length; n++)
-                                        {
-                                            string c = d[n] + fileend;
-                                            if (createFolders) { Directory.CreateDirectory(c); }
-                                            string fp = c;
-                                            c += "\\" + filename;
-                                            try
+                                            string rp = "";
+                                            for (int t = i; t < ffn.Length - 1; t++)
                                             {
-                                                if (compare.Contains(c)) { break; }
-                                                compare.Add(c);
-                                                string y = Copy(source, c, overWrite, conFirm);
-                                                found = true;
-                                                if (y == "Yes")
+                                                if (t == i) { continue; }
+                                                rp += "\\" + ffn[t];
+                                            }
+                                            string fp = tp + rp;
+                                            //if (networkPath) { fp = "\\\\" + fp; }
+                                            bool rpexist = Directory.Exists(fp);
+                                            if (rpexist) { destinationpaths.Add(fp); found = true; }
+                                            else if (createFolders)
+                                            { //if not, but created folders param is on, then create the path (based on first matched folder, then subseq if unconfirmed)
+                                                System.Windows.Forms.DialogResult createcon;
+                                                createcon = System.Windows.Forms.MessageBox.Show("Create path: " + fp + " ?", "Confirm", System.Windows.Forms.MessageBoxButtons.YesNo);
+                                                if (createcon == System.Windows.Forms.DialogResult.Yes)
                                                 {
-                                                    if (!filePaths.Contains(fp)) { filePaths.Add(fp); }
-                                                    break;
+                                                    Directory.CreateDirectory(fp);
+                                                    destinationpaths.Add(fp);
+                                                    found = true;
                                                 }
                                             }
-                                            catch (DirectoryNotFoundException ex)
-                                            {
-                                                System.Windows.Forms.MessageBox.Show("'Create folders' off. Can't write to path as full path does not exist: " + c, "ERROR");
-                                            }
                                         }
+                                        break;
                                     }
-                                }                                                        
+                                }
+                            } 
+                            
+                            if (!found && createFolders) { System.Windows.Forms.MessageBox.Show("No matches found, no files copied", "UNSUCCESSFUL"); return; }
+                            else if (!found && !createFolders) { System.Windows.Forms.MessageBox.Show("No matches found, no files copied - Try the create folders parameter", "UNSUCCESSFUL"); return; }
+                            else {
+                                if (destinationpaths.Count < 1) { System.Windows.Forms.MessageBox.Show("Application error", "CRITICAL ERROR"); return; }
+                                foreach (string dest in destinationpaths)
+                                {
+                                    string file = dest + "\\" + lio;
+                                    string y = Copy(source, file, overWrite, conFirm);
+                                    if (y == "Yes")
+                                    {
+                                        if (!filePaths.Contains((string)dest)) { filePaths.Add((string)dest); }
+                                        break;
+                                    }
+                                }                                
                             }
-                            if (!found) {System.Windows.Forms.MessageBox.Show("No matches found, no files copied", "UNSUCCESSFUL"); }
                         }
-                        else
+                        else // Straight copy, no path matching
                         {
                             for (int i = 0; i < copypaths.Count; i++)
-                            {
-                                string lio = source.Substring(source.LastIndexOf("\\"));
+                            {                                
                                 string file = copypaths[i] + "\\" + lio;
                                 string y=Copy(source, file, overWrite, conFirm);
-                                if (y == "Yes")
+                                /*if (y == "Yes")
                                 {
                                     if (!filePaths.Contains((string)copypaths[i])) { filePaths.Add((string)copypaths[i]); }
                                     break;
-                                }
+                                }*/
                             }
                         }
                     }
