@@ -15,15 +15,15 @@ namespace MultiSave
     //??: A WAY TO CARRY MAPPED DRIVES TO ADMIN MODE
     //OR
     //??: A WAY TO PERFORM THE REGISTRY TASK WITH ELEVATED PRIVILEGES INDEPENDENT OF THE REST OF THE APP
-    //?? Pass BatchSave .exe path into this project
     
     //TODO: Add/manage groups
     //TODO: Make tray icon
     //TODO: Always/never/ask overwrite options
     //TODO: Progress bar for Match Path
     //TODO: Add feature for symlinks?
-    //TODO: Handler when network folder not connected (and therefor not visible)
+    //TODO: Handler when network folder not connected (and therefore not visible)
     //TODO: Remove registry key on uninstall
+    //TODO: A way to view/clear destination group cache
 
     public partial class MainWindow : Window
     {
@@ -53,8 +53,12 @@ namespace MultiSave
                         break;
                     case 3: if (Convert.ToBoolean(pl[i])) { conFirm.IsChecked = true; } else { conFirm.IsChecked = false; }
                         break;
+                    }
                 }
-                }
+            if (syncBelow.IsChecked == true)
+            {
+                createNotexist.IsEnabled = true;
+            }
             linkedFolderList.ItemsSource = fl;
             if (fl.Count <= 0) { btnRemoveFolder.IsEnabled = false; }
         }
@@ -132,7 +136,7 @@ namespace MultiSave
             {
                 createNotexist.IsEnabled = false;
             }
-            else { createNotexist.IsEnabled = true; }
+            else { createNotexist.IsEnabled = true; conFirm.IsChecked = true; }
         }
 
         //When closing from X -- Doesnt WORK

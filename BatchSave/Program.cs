@@ -198,7 +198,7 @@ namespace BatchSave
         //The method to actually copy the file, passing in overwrite and confirm parameters
         static string Copy(string s, string d, bool ow, bool c) {
             System.Windows.Forms.DialogResult con;
-            if (c) { con = System.Windows.Forms.MessageBox.Show("Save file to: " + d + "?", "Confirm", System.Windows.Forms.MessageBoxButtons.YesNo); }
+            if (c) { con = System.Windows.Forms.MessageBox.Show("Save "+s+" to: " + d + "?", "Confirm", System.Windows.Forms.MessageBoxButtons.YesNo); }
             else { con = System.Windows.Forms.DialogResult.Yes; }
             if (con == System.Windows.Forms.DialogResult.Yes)
             {
