@@ -14,7 +14,7 @@ To use:
   *EXAMPLE:*
   For the source *C://Users/username/Documents/Working/source.txt*,
   
-  instead of copying to
+  Instead of copying to
   *//Drive/Destination/source.txt*, as is the default, 
   if *//Drive/Destination/Document* exists 
   it will copy to
