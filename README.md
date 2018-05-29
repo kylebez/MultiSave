@@ -43,7 +43,7 @@ To use:
 
 3. Hit Apply & Close to set the destination group and parameters in the registry.
 
-4. Right-click source file(s) in File Explorer and select **Save to Linked Group**
+4. Right-click source file(s) in File Explorer and select **Save to Linked Group** (this does not have to be in admin mode)
 
 5. Program will run, displaying confirmation boxes if eneabled, or displaying error messages if applicable.
 
