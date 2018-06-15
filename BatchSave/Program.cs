@@ -4,8 +4,9 @@ using System.Collections;
 using System.Diagnostics;
 using System.Reflection;
 using MultiSave;
-using System.Runtime.Caching;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Configuration;
 
 namespace BatchSave
 {
@@ -13,12 +14,12 @@ namespace BatchSave
     {
         static void Main(string[] args)
         {
+            Debugger.Launch();
             string source = "";
             bool syncBelow = false;
             bool createFolders = false;
             bool overWrite = false;
             bool conFirm = false; 
-            ObjectCache cache = MemoryCache.Default;            
             ArrayList copypaths = new ArrayList();            
             //Check for valid file path parameters
             if (args.Length > 2)
@@ -108,10 +109,32 @@ namespace BatchSave
 
                             //CHECK IN CACHE
                             bool inCache = false;
-                            foreach (string m in mpathList) {
+                            foreach (string m in mpathList) {                                
                                 if (m.Contains(f)) {
-                                    if (Directory.Exists(m)) {
-                                        destinationpaths.Add(m);
+                                    string mm = m;
+                                    int ms = m.LastIndexOf(f);
+                                    int fl = f.Length;
+                                    int nx = ms + fl;
+                                    string next = m.Substring(nx);
+                                    Match mat = Regex.Match(next,@"\\[a-zA-Z]\\");
+                                    if (mat.Captures.Count > 0 && source.Contains(mat.Captures[0].Value)) {                                        
+                                        mm+= mat.Captures[0].Value;
+                                        if (!m.Contains(mm))
+                                        {
+                                            continue;
+                                        }
+                                    }
+                                    else if (source.Contains(next)) {
+                                        mm += next;
+                                        if (!m.Contains(mm))
+                                        {
+                                            continue;
+                                        }
+                                    }
+                                    else{ continue; }
+                                    
+                                    if (Directory.Exists(mm)) {
+                                        destinationpaths.Add(mm);
                                         inCache = true;
                                         found = true;
                                     }
@@ -139,8 +162,8 @@ namespace BatchSave
                                             string fp = tp + rp;
                                             //if (networkPath) { fp = "\\\\" + fp; }
                                             bool rpexist = Directory.Exists(fp);
-                                            if (rpexist) { destinationpaths.Add(fp); found = true; }
-                                            else if (createFolders)
+                                            if (rpexist && !destinationpaths.Contains(fp) ) { destinationpaths.Add(fp); found = true; }
+                                            else if (createFolders && !destinationpaths.Contains(fp))
                                             { //if not, but created folders param is on, then create the path (based on first matched folder, then subseq if unconfirmed)
                                                 System.Windows.Forms.DialogResult createcon;
                                                 createcon = System.Windows.Forms.MessageBox.Show("Create path: " + fp + " ?", "Confirm", System.Windows.Forms.MessageBoxButtons.YesNo);

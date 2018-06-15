@@ -3,7 +3,8 @@
   <Profiles />
   <Settings>
     <Setting Name="filepaths" Type="System.Collections.Generic.List&lt;System.String&gt;" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">        
+    </Value>
     </Setting>
     <Setting Name="targetpaths" Type="System.Collections.Generic.List&lt;System.String&gt;" Scope="User">
       <Value Profile="(Default)" />
