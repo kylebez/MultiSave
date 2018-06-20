@@ -57,6 +57,7 @@ When run again, if detination group has not changed, it will run from the cached
 **OTHER NOTES**
 * Copying to network paths that require credentials will **fail** unless the required connection is made in File Explorer. (Credentials will have to be re-entered every time the computer is restart for example).
 * Mapped network drives do not carry over to the MultiSave dialog box. When adding a network location, you will have to remap the network drives - (right click *This PC* in the *Browse for Folder* dialog). Hopefully I will be able to release an update to resolve this.
+* File paths MUST NOT CONTAIN spaces
 
 
 
