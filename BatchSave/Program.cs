@@ -14,7 +14,6 @@ namespace BatchSave
     {
         static void Main(string[] args)
         {
-            Debugger.Launch();
             string source = "";
             bool syncBelow = false;
             bool createFolders = false;
