@@ -14,6 +14,7 @@ namespace BatchSave
     {
         static void Main(string[] args)
         {
+            Debugger.Launch();
             string source = "";
             bool syncBelow = false;
             bool createFolders = false;
@@ -125,18 +126,17 @@ namespace BatchSave
                                     }
                                     else if (source.Contains(next)) {
                                         mm += next;
-                                        if (!m.Contains(mm))
+                                        if (m.Contains(mm))
                                         {
-                                            continue;
+                                            if (Directory.Exists(mm))
+                                            {
+                                                destinationpaths.Add(mm);
+                                                inCache = true;
+                                                found = true;
+                                            }
                                         }
                                     }
-                                    else{ continue; }
-                                    
-                                    if (Directory.Exists(mm)) {
-                                        destinationpaths.Add(mm);
-                                        inCache = true;
-                                        found = true;
-                                    }
+                                    else{ continue; }                                   
                                 }
                             }
                             //CHECK NOT IN CACHE
