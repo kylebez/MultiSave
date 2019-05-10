@@ -1,7 +1,7 @@
 # MultiSave
 A utility to save a file to multiple locations simultaneously.
 
-**TODO** - Cache not working properly
+**TODO** - Cache not working properly - MORE STABLE VERSION COMING SOON
 
 *MUST BE RUN IN ADMIN MODE*
 
